@@ -61,6 +61,7 @@ public class ListingLotSearchService {
             AuctionLotCategory category,
             BigDecimal minPrice,
             BigDecimal maxPrice,
+            boolean endingSoon,
             PageRequest pageRequest) {
 
         try {
@@ -105,6 +106,16 @@ public class ListingLotSearchService {
 
                                 if (category != null) {
                                     b.filter(f -> f.term(t -> t.field("category").value(category.name())));
+                                }
+
+                                if (endingSoon) {
+                                    b.filter(f -> f.range(r -> r
+                                            .date(d -> d
+                                                    .field("expirationDate")
+                                                    .gte("now")
+                                                    .lte("now+24h")
+                                            )
+                                    ));
                                 }
 
                                 if ((minPrice != null && minPrice.compareTo(BigDecimal.ZERO) > 0) ||

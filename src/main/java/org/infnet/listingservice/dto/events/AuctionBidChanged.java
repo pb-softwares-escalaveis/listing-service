@@ -6,6 +6,6 @@ import java.util.UUID;
 public record AuctionBidChanged(
         Long auctionId,
         UUID correlationId,
-        BigDecimal newPrice
+        BigDecimal amount
 ) {
 }

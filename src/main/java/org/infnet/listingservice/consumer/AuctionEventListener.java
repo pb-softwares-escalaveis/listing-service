@@ -10,6 +10,8 @@ import org.infnet.listingservice.repository.ListingLotRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -17,10 +19,10 @@ public class AuctionEventListener {
     private final ListingLotRepository lotRepository;
 
     @KafkaListener(topics = "${app.kafka-topics.auction-approved}")
-    public void consumeApproved(AuctionApprovedEvent event){
+    public void consumeApproved(AuctionApprovedEvent event) {
         log.info("Consumido evento de AuctionApproved. Anúncio: {}", event.auctionId());
 
-        ListingLotDocument lot = new  ListingLotDocument();
+        ListingLotDocument lot = new ListingLotDocument();
         lot.setId(event.auctionId());
         lot.setTitle(event.auctionTitle());
         lot.setDescription(event.description());
@@ -36,7 +38,7 @@ public class AuctionEventListener {
     }
 
     @KafkaListener(topics = {"${app.kafka-topics.auction-ended-with-winner}"})
-    public void consumeEndedWithWinner(AuctionStatusChangeEvent event){
+    public void consumeEndedWithWinner(AuctionStatusChangeEvent event) {
         log.info("Consumido evento de AuctionEndedWinnerEvent. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
@@ -46,7 +48,7 @@ public class AuctionEventListener {
     }
 
     @KafkaListener(topics = {"${app.kafka-topics.auction-ended-without-winner}"})
-    public void consumeEndedWithoutWinner(AuctionStatusChangeEvent event){
+    public void consumeEndedWithoutWinner(AuctionStatusChangeEvent event) {
         log.info("Consumido evento de AuctionEndedWithoutWinnerEvent. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
@@ -56,7 +58,7 @@ public class AuctionEventListener {
     }
 
     @KafkaListener(topics = {"${app.kafka-topics.auction-removed}"})
-    public void consumeRemoved(AuctionStatusChangeEvent event){
+    public void consumeRemoved(AuctionStatusChangeEvent event) {
         log.info("Consumido evento de AuctionRemoved. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
@@ -66,7 +68,7 @@ public class AuctionEventListener {
     }
 
     @KafkaListener(topics = {"${app.kafka-topics.auction-canceled}"})
-    public void consumeCanceled(AuctionStatusChangeEvent event){
+    public void consumeCanceled(AuctionStatusChangeEvent event) {
         log.info("Consumido evento de AuctionCanceled. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
@@ -76,49 +78,55 @@ public class AuctionEventListener {
     }
 
     @KafkaListener(topics = {"${app.kafka-topics.auction-renewed}"})
-    public void consumeRenewed(AuctionStatusChangeEvent event){
+    public void consumeRenewed(AuctionStatusChangeEvent event) {
         log.info("Consumido evento de AuctionRenewed. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
 
         lot.setStatus(AuctionStatus.ACTIVE);
-        lot.setCurrentBidPrice(lot.getInitialBidPrice());
+        BigDecimal fallbackPrice = lot.getInitialBidPrice() != null ? lot.getInitialBidPrice() : BigDecimal.ZERO;
+        lot.setCurrentBidPrice(fallbackPrice);
         lotRepository.save(lot);
     }
 
     @KafkaListener(topics = {"${app.kafka-topics.bid-highest-invalidated}"})
-    public void consumeBidInvalidated(AuctionBidChanged event){
+    public void consumeBidInvalidated(AuctionBidChanged event) {
         log.info("Consumido evento de NewHighestBidderAssigned. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
 
-        lot.setCurrentBidPrice(event.newPrice());
+        lot.setCurrentBidPrice(event.amount());
         lotRepository.save(lot);
     }
 
     @KafkaListener(topics = {"${app.kafka-topics.auction-bid-reset}"})
-    public void consumeBidReset(AuctionStatusChangeEvent event){
+    public void consumeBidReset(AuctionStatusChangeEvent event) {
         log.info("Consumido evento de AuctionBidReset. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
 
-        lot.setCurrentBidPrice(lot.getInitialBidPrice());
+        BigDecimal fallbackPrice = lot.getInitialBidPrice() != null ? lot.getInitialBidPrice() : BigDecimal.ZERO;
+        lot.setCurrentBidPrice(fallbackPrice);
         lotRepository.save(lot);
     }
 
     @KafkaListener(topics = "${app.kafka-topics.bid-placed}")
-    public void consumeBidPlaced(AuctionBidChanged event){
+    public void consumeBidPlaced(AuctionBidChanged event) {
         log.info("Consumido evento de BidPlaced. Anúncio: {}", event.auctionId());
 
         var lot = getLot(event.auctionId());
 
-        lot.setCurrentBidPrice(event.newPrice());
+        lot.setCurrentBidPrice(event.amount());
         lotRepository.save(lot);
     }
 
-    private ListingLotDocument getLot(Long lotId){
+    private ListingLotDocument getLot(Long lotId) {
         return lotRepository.findById(lotId)
-                .orElseThrow(() -> new ListingProjectionNotFound(
-                        "Anúncio não encontrado na projeção local: " + lotId));
+                .orElseThrow(() -> {
+                            log.error("ERRO DE RACING CONDITION: Evento recebido do anúncio id: {}, mas o documento não está replicado.", lotId);
+                            return new ListingProjectionNotFound("Anúncio não encontrado na projeção local: " + lotId);
+                        }
+                );
     }
+
 }

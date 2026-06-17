@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.infnet.listingservice.enums.AuctionLotCategory;
 import org.infnet.listingservice.enums.AuctionStatus;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.elasticsearch.annotations.*;
 
 import java.math.BigDecimal;
@@ -64,7 +63,4 @@ public class ListingLotDocument {
 
     @Field(type = FieldType.Date)
     private Instant createdAt;
-
-    @Version
-    private Long version;
 }

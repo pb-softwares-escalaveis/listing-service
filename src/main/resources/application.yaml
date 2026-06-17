@@ -8,7 +8,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: auction-service-group
+      group-id: listing-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -16,6 +16,9 @@ spring:
         spring.json.trusted.packages: org.infnet.auctionservice.*
         spring.json.add.type.headers: false
         spring.json.use.type.headers: false
+
+server:
+  port: 8065
 
 app:
   kafka-topics:

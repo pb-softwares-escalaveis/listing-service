@@ -32,6 +32,7 @@ public class ListingLotController {
             @RequestParam(value = "category", required = false) AuctionLotCategory category,
             @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
             @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(value = "endingSoon", defaultValue = "false")  boolean endingSoon,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "sortBy", defaultValue = "_score") String sortBy,
@@ -40,7 +41,7 @@ public class ListingLotController {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortDir, sortBy));
 
         Page<ListingLotDto> results = searchService.search(
-                query, category, minPrice, maxPrice, pageRequest
+                query, category, minPrice, maxPrice, endingSoon, pageRequest
         );
         return ResponseEntity.ok(results);
     }
@@ -53,7 +54,7 @@ public class ListingLotController {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "created"));
 
         Page<ListingLotDto> results = searchService.search(
-                null, null, null, null, pageRequest
+                null, null, null, null, false, pageRequest
         );
         return ResponseEntity.ok(results);
     }
