@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: listing-service
+
+  elasticsearch:
+    uris: http://localhost:9200
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: auction-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: org.infnet.auctionservice.*
+        spring.json.add.type.headers: false
+        spring.json.use.type.headers: false
+
+app:
+  kafka-topics:
+    auction-approved: "auctions.lot.approved"
+    auction-ended-without-winner: "auctions.lot.ended-without-winner"
+    auction-ended-with-winner: "auctions.lot.ended-with-winner"
+    auction-removed: "auctions.lot.removed"
+    auction-renewed: "auctions.lot.renewed"
+    auction-canceled: "auctions.lot.canceled"
+    auction-bid-reset: "auctions.bid.reset"
+    bid-highest-invalidated: "auctions.bid.new-highest-assigned"
+    bid-placed: "auctions.bid.placed"
