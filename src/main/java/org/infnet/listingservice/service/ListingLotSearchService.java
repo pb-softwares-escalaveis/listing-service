@@ -9,11 +9,9 @@ import org.infnet.listingservice.dto.TitleAutocompleteDto;
 import org.infnet.listingservice.enums.AuctionLotCategory;
 import org.infnet.listingservice.enums.AuctionStatus;
 import org.infnet.listingservice.model.ListingLotDocument;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

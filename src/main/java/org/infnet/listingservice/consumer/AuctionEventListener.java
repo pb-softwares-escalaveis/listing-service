@@ -8,14 +8,12 @@ import org.infnet.listingservice.model.ListingLotDocument;
 import org.infnet.listingservice.repository.ListingLotRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class AuctionEventListener {
     private final ListingLotRepository lotRepository;
-    private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "${app.kafka-topics.connect-topic}")
     public void consume(DebeziumEvent event) {
