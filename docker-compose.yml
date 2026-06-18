@@ -1,6 +1,6 @@
 services:
   listing-service:
-    build: .
+    image: pedrovncs/listing-service:latest
     container_name: listing-service-app
     ports:
       - "${LISTING_SERVICE_PORT}:8080"
@@ -25,14 +25,19 @@ services:
       - xpack.security.http.ssl.enabled=false
     ports:
       - "${LISTING_SERVICE_ELASTIC_PORT}:9200"
+    volumes:
+      - listing-elastic-data:/usr/share/elasticsearch/data
     networks:
       - leilao-network
     healthcheck:
-      test: [ "CMD-SHELL", "curl -fsSL http://localhost:9200 || exit 1" ]
+      test: [ "CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"'" ]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 15s
+      start_period: 30s
+
+volumes:
+  listing-elastic-data:
 
 networks:
   leilao-network:

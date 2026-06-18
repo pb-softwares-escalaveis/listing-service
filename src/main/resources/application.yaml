@@ -16,7 +16,7 @@ spring:
         spring.json.use.type.headers: false
 
 server:
-  port: ${LISTING_SERVICE_PORT}
+  port: ${LISTING_SERVICE_PORT:8080}
 
 management:
   endpoints:
