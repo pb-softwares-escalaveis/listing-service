@@ -4,7 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import org.infnet.listingservice.dto.ListingLotDto;
+import org.infnet.listingservice.dto.ListingLotResponse;
 import org.infnet.listingservice.dto.TitleAutocompleteDto;
 import org.infnet.listingservice.enums.AuctionLotCategory;
 import org.infnet.listingservice.enums.AuctionStatus;
@@ -56,7 +56,7 @@ public class ListingLotSearchService {
         }
     }
 
-    public Page<ListingLotDto> search(
+    public Page<ListingLotResponse> search(
             String textQuery,
             AuctionLotCategory category,
             BigDecimal minPrice,
@@ -133,7 +133,7 @@ public class ListingLotSearchService {
                             })),
                     ListingLotDocument.class);
 
-            List<ListingLotDto> dtos = mapResponseToDtoList(response);
+            List<ListingLotResponse> dtos = mapResponseToDtoList(response);
             long totalHits = response.hits().total() != null ? response.hits().total().value() : 0;
 
             return new PageImpl<>(dtos, pageRequest, totalHits);
@@ -143,11 +143,11 @@ public class ListingLotSearchService {
         }
     }
 
-    private List<ListingLotDto> mapResponseToDtoList(SearchResponse<ListingLotDocument> response) {
+    private List<ListingLotResponse> mapResponseToDtoList(SearchResponse<ListingLotDocument> response) {
         return response.hits().hits().stream()
                 .map(Hit::source)
                 .filter(Objects::nonNull)
-                .map(doc -> new ListingLotDto(
+                .map(doc -> new ListingLotResponse(
                         doc.getId(),
                         doc.getTitle(),
                         doc.getDescription(),

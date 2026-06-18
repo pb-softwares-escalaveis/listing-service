@@ -3,7 +3,7 @@ package org.infnet.listingservice.controller;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.infnet.listingservice.dto.ListingLotDto;
+import org.infnet.listingservice.dto.ListingLotResponse;
 import org.infnet.listingservice.dto.TitleAutocompleteDto;
 import org.infnet.listingservice.enums.AuctionLotCategory;
 import org.infnet.listingservice.service.ListingLotSearchService;
@@ -32,7 +32,7 @@ public class ListingLotController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ListingLotDto>> search(
+    public ResponseEntity<Page<ListingLotResponse>> search(
             @RequestParam(value = "q", required = false)
             String query,
             @RequestParam(value = "category", required = false)
@@ -63,14 +63,14 @@ public class ListingLotController {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortDir, sortBy));
 
-        Page<ListingLotDto> results = searchService.search(
+        Page<ListingLotResponse> results = searchService.search(
                 query, category, minPrice, maxPrice, endingSoon, pageRequest
         );
         return ResponseEntity.ok(results);
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<Page<ListingLotDto>> getLatestListings(
+    public ResponseEntity<Page<ListingLotResponse>> getLatestListings(
             @RequestParam(value = "page", defaultValue = "0")
             int page,
 
@@ -81,7 +81,7 @@ public class ListingLotController {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "created"));
 
-        Page<ListingLotDto> results = searchService.search(
+        Page<ListingLotResponse> results = searchService.search(
                 null, null, null, null, false, pageRequest
         );
         return ResponseEntity.ok(results);

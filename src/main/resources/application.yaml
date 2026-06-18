@@ -2,32 +2,39 @@ spring:
   application:
     name: listing-service
 
+  config:
+    import: "optional:file:.env[.properties]"
+
   elasticsearch:
-    uris: http://localhost:9200
+    uris: ${LISTING_SERVICE_ELASTIC_URI:http://localhost:9200}
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:localhost:9092}
     consumer:
       group-id: listing-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       properties:
-        spring.json.trusted.packages: org.infnet.auctionservice.*
-        spring.json.add.type.headers: false
         spring.json.use.type.headers: false
 
 server:
-  port: 8065
+  port: ${LISTING_SERVICE_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.uuid}}
+    prefer-ip-address: true
 
 app:
   kafka-topics:
-    auction-approved: "auctions.lot.approved"
-    auction-ended-without-winner: "auctions.lot.ended-without-winner"
-    auction-ended-with-winner: "auctions.lot.ended-with-winner"
-    auction-removed: "auctions.lot.removed"
-    auction-renewed: "auctions.lot.renewed"
-    auction-canceled: "auctions.lot.canceled"
-    auction-bid-reset: "auctions.bid.reset"
-    bid-highest-invalidated: "auctions.bid.new-highest-assigned"
-    bid-placed: "auctions.bid.placed"
+    connect-topic: "auction_connect.public.auction_lots"

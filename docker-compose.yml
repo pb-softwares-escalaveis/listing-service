@@ -1,0 +1,39 @@
+services:
+  listing-service:
+    build: .
+    container_name: listing-service-app
+    ports:
+      - "${LISTING_SERVICE_PORT:-8080}:8080"
+    environment:
+      - LISTING_SERVICE_PORT=${LISTING_SERVICE_PORT:-8080}
+      - LISTING_SERVICE_ELASTIC_URI=${LISTING_SERVICE_ELASTIC_URI:-http://listing-elasticsearch:9200}
+      - KAFKA_BOOTSTRAP_SERVER=${KAFKA_BOOTSTRAP_SERVER:-kafka:29092}
+      - EUREKA_SERVER_URL=${EUREKA_SERVER_URL:-http://eureka-server:8761/eureka/}
+    depends_on:
+      listing-elasticsearch:
+        condition: service_healthy
+    networks:
+      - leilao-network
+
+  listing-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+    container_name: listing-service-elastic
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.http.ssl.enabled=false
+    ports:
+      - "${LISTING_SERVICE_ELASTIC_PORT:-9200}:9200"
+    networks:
+      - leilao-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsSL http://localhost:9200 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+networks:
+  leilao-network:
+    external: true
