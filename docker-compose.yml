@@ -3,12 +3,12 @@ services:
     build: .
     container_name: listing-service-app
     ports:
-      - "${LISTING_SERVICE_PORT:-8080}:8080"
+      - "${LISTING_SERVICE_PORT}:8080"
     environment:
-      - LISTING_SERVICE_PORT=${LISTING_SERVICE_PORT:-8080}
-      - LISTING_SERVICE_ELASTIC_URI=${LISTING_SERVICE_ELASTIC_URI:-http://listing-elasticsearch:9200}
-      - KAFKA_BOOTSTRAP_SERVER=${KAFKA_BOOTSTRAP_SERVER:-kafka:29092}
-      - EUREKA_SERVER_URL=${EUREKA_SERVER_URL:-http://eureka-server:8761/eureka/}
+      LISTING_SERVICE_PORT: ${LISTING_SERVICE_PORT}
+      LISTING_SERVICE_ELASTIC_URI: ${LISTING_SERVICE_ELASTIC_URI}
+      KAFKA_BOOTSTRAP_SERVER: ${KAFKA_BOOTSTRAP_SERVER}
+      EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
     depends_on:
       listing-elasticsearch:
         condition: service_healthy
@@ -24,7 +24,7 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - xpack.security.http.ssl.enabled=false
     ports:
-      - "${LISTING_SERVICE_ELASTIC_PORT:-9200}:9200"
+      - "${LISTING_SERVICE_ELASTIC_PORT}:9200"
     networks:
       - leilao-network
     healthcheck:
