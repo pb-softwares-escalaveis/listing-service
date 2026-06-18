@@ -3,7 +3,7 @@ package org.infnet.listingservice.dto;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-public record ListingLotDto(
+public record ListingLotResponse(
         Long id,
         String title,
         String description,
