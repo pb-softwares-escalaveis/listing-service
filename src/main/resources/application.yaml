@@ -18,6 +18,8 @@ spring:
 server:
   port: ${LISTING_SERVICE_PORT:8080}
 
+
+
 management:
   endpoints:
     web:
